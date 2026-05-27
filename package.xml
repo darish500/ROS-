@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>line_follower_robot</name>
+  <version>0.1.0</version>
+  <description>
+    A line-following differential drive robot simulated in Gazebo Harmonic with ROS2 Jazzy.
+    The robot uses a downward-facing camera to detect and follow a black line on a white track.
+  </description>
+  <maintainer email="user@example.com">Khalid</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+
+  <!-- ROS2 core -->
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+
+  <!-- Gazebo / ROS2 bridge -->
+  <depend>ros_gz_sim</depend>
+  <depend>ros_gz_bridge</depend>
+
+  <!-- Robot description -->
+  <depend>robot_state_publisher</depend>
+  <depend>xacro</depend>
+
+  <!-- cv_bridge for image processing in Python -->
+  <depend>cv_bridge</depend>
+
+  <!-- Launch dependencies -->
+  <exec_depend>ros2launch</exec_depend>
+
+  <test_depend>ament_pep8</test_depend>
+  <test_depend>ament_copyright</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

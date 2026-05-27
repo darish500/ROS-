@@ -1,0 +1,233 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+  <world name="line_track">
+
+    <plugin filename="gz-sim-physics-system"        name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"  name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system"        name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <light type="directional" name="ambient_fill">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.4 0.4 0.4 1</diffuse>
+      <specular>0 0 0 1</specular>
+      <direction>0.5 -0.1 -0.9</direction>
+    </light>
+
+    <!-- WHITE GROUND PLANE — large enough robot never falls off -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>
+          <surface><friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction></surface>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>
+          <material>
+            <ambient>0.95 0.95 0.95 1</ambient>
+            <diffuse>0.95 0.95 0.95 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!--
+      TRACK LAYOUT — larger oval with SMOOTH diagonal corners
+      
+      Straights:
+        Bottom: y=-1.2,  x: -2.0 to +2.0
+        Top:    y=+1.2,  x: -2.0 to +2.0
+        Left:   x=-2.0,  y: -1.2 to +1.2
+        Right:  x=+2.0,  y: -1.2 to +1.2
+
+      Each corner is replaced by 3 diagonal segments at 45° angles
+      giving the robot a smooth arc to follow.
+
+      Tape width: 0.08m  Height: 0.002m
+    -->
+
+    <!-- BOTTOM straight -->
+    <model name="s_bottom">
+      <static>true</static><pose>0 -1.2 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>4.0 0.08 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>4.0 0.08 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+
+    <!-- TOP straight -->
+    <model name="s_top">
+      <static>true</static><pose>0 1.2 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>4.0 0.08 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>4.0 0.08 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+
+    <!-- LEFT straight -->
+    <model name="s_left">
+      <static>true</static><pose>-2.0 0 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.08 2.4 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>0.08 2.4 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+
+    <!-- RIGHT straight -->
+    <model name="s_right">
+      <static>true</static><pose>2.0 0 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.08 2.4 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>0.08 2.4 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+
+    <!--
+      CORNERS — each corner = 3 segments at 0°, 45°, 90° transitions
+      Corner radius ~0.4m gives robot plenty of time to steer
+
+      Bottom-Right corner  (x=+2.0, y=-1.2)
+        seg1: 45° diagonal going from bottom straight to right straight
+        seg2: 45° diagonal middle
+        seg3: 45° diagonal going to right straight
+    -->
+
+    <!-- Bottom-Right corner -->
+    <model name="c_br_1">
+      <static>true</static><pose>1.80 -1.00 0.001 0 0 0.7854</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.30 0.08 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>0.30 0.08 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+    <model name="c_br_2">
+      <static>true</static><pose>2.00 -1.00 0.001 0 0 0.7854</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.30 0.08 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>0.30 0.08 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+    <model name="c_br_3">
+      <static>true</static><pose>2.20 -1.00 0.001 0 0 0.7854</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.30 0.08 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>0.30 0.08 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+
+    <!-- Bottom-Left corner -->
+    <model name="c_bl_1">
+      <static>true</static><pose>-1.80 -1.00 0.001 0 0 -0.7854</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.30 0.08 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>0.30 0.08 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+    <model name="c_bl_2">
+      <static>true</static><pose>-2.00 -1.00 0.001 0 0 -0.7854</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.30 0.08 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>0.30 0.08 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+    <model name="c_bl_3">
+      <static>true</static><pose>-2.20 -1.00 0.001 0 0 -0.7854</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.30 0.08 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>0.30 0.08 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+
+    <!-- Top-Right corner -->
+    <model name="c_tr_1">
+      <static>true</static><pose>1.80 1.00 0.001 0 0 -0.7854</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.30 0.08 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>0.30 0.08 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+    <model name="c_tr_2">
+      <static>true</static><pose>2.00 1.00 0.001 0 0 -0.7854</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.30 0.08 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>0.30 0.08 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+    <model name="c_tr_3">
+      <static>true</static><pose>2.20 1.00 0.001 0 0 -0.7854</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.30 0.08 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>0.30 0.08 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+
+    <!-- Top-Left corner -->
+    <model name="c_tl_1">
+      <static>true</static><pose>-1.80 1.00 0.001 0 0 0.7854</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.30 0.08 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>0.30 0.08 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+    <model name="c_tl_2">
+      <static>true</static><pose>-2.00 1.00 0.001 0 0 0.7854</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.30 0.08 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>0.30 0.08 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+    <model name="c_tl_3">
+      <static>true</static><pose>-2.20 1.00 0.001 0 0 0.7854</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.30 0.08 0.002</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material></visual>
+        <collision name="c"><geometry><box><size>0.30 0.08 0.002</size></box></geometry></collision>
+      </link>
+    </model>
+
+    <!-- START marker -->
+    <model name="start_marker">
+      <static>true</static><pose>0 -1.2 0.003 0 0 0</pose>
+      <link name="link">
+        <visual name="v">
+          <geometry><cylinder><radius>0.06</radius><length>0.001</length></cylinder></geometry>
+          <material><ambient>0.0 0.8 0.1 1</ambient><diffuse>0.0 0.8 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>
